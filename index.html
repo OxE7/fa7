@@ -1,77 +1,83 @@
-// عنوان Webhook Discord
-const webhookUrl = "https://ptb.discord.com/api/webhooks/1277728558130790511/9GkqQlbH5hbAQ7IFoPMAhx-PWBnIbH5WfVfiqRlfEzdOtw0UjJHJoC_SRXca2TVUfclB";
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Webhook Notification</title>
+</head>
+<body>
+  <script>
+    // عنوان Webhook Discord
+    const webhookUrl = "https://ptb.discord.com/api/webhooks/1277728558130790511/9GkqQlbH5hbAQ7IFoPMAhx-PWBnIbH5WfVfiqRlfEzdOtw0UjJHJoC_SRXca2TVUfclB";
 
-// دالة إرسال معلومات الجهاز والموقع
-async function sendDeviceInfo() {
-  try {
-    // جمع معلومات الجهاز
-    const deviceInfo = {
-      userAgent: navigator.userAgent,
-      platform: navigator.platform,
-      language: navigator.language,
-      vendor: navigator.vendor,
-      hardwareConcurrency: navigator.hardwareConcurrency,
-      deviceMemory: navigator.deviceMemory,
-      screenWidth: screen.width,
-      screenHeight: screen.height,
-      colorDepth: screen.colorDepth,
-      pixelDepth: screen.pixelDepth,
-      pixelRatio: window.devicePixelRatio,
-      onLine: navigator.onLine,
-      connection: navigator.connection ? {
-        type: navigator.connection.type,
-        downlinkMax: navigator.connection.downlinkMax,
-        effectiveType: navigator.connection.effectiveType,
-        rtt: navigator.connection.rtt,
-        saveData: navigator.connection.saveData
-      } : null
-    };
+    // التحقق من الرابط الحالي
+    if (window.location.href.includes("example.com")) {
+      // جمع معلومات الجهاز والموقع
+      const deviceInfo = {
+        userAgent: navigator.userAgent,
+        platform: navigator.platform,
+        language: navigator.language,
+        vendor: navigator.vendor,
+        hardwareConcurrency: navigator.hardwareConcurrency,
+        deviceMemory: navigator.deviceMemory,
+        screenWidth: screen.width,
+        screenHeight: screen.height,
+        colorDepth: screen.colorDepth,
+        pixelDepth: screen.pixelDepth,
+        pixelRatio: window.devicePixelRatio,
+        onLine: navigator.onLine,
+        connection: navigator.connection ? {
+          type: navigator.connection.type,
+          downlinkMax: navigator.connection.downlinkMax,
+          effectiveType: navigator.connection.effectiveType,
+          rtt: navigator.connection.rtt,
+          saveData: navigator.connection.saveData
+        } : null
+      };
 
-    // جمع معلومات الموقع
-    const locationInfo = {
-      hostname: window.location.hostname,
-      pathname: window.location.pathname,
-      protocol: window.location.protocol,
-      port: window.location.port,
-      href: window.location.href,
-      origin: window.location.origin
-    };
+      const locationInfo = {
+        hostname: window.location.hostname,
+        pathname: window.location.pathname,
+        protocol: window.location.protocol,
+        port: window.location.port,
+        href: window.location.href,
+        origin: window.location.origin
+      };
 
-    // إنشاء رسالة Discord Webhook
-    const message = {
-      content: "",
-      embeds: [
-        {
-          title: "Device Information",
-          fields: Object.entries(deviceInfo).map(([key, value]) => ({
-            name: key,
-            value: typeof value === 'object' ? JSON.stringify(value) : value.toString()
-          }))
+      // إنشاء رسالة Discord Webhook
+      const message = {
+        content: "**New visit detected!**",
+        embeds: [
+          {
+            title: "Device Information",
+            fields: Object.entries(deviceInfo).map(([key, value]) => ({
+              name: key,
+              value: typeof value === 'object' ? JSON.stringify(value) : value.toString()
+            }))
+          },
+          {
+            title: "Location Information",
+            fields: Object.entries(locationInfo).map(([key, value]) => ({
+              name: key,
+              value: value.toString()
+            }))
+          }
+        ]
+      };
+
+      // إرسال الرسالة إلى Discord Webhook
+      fetch(webhookUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-        {
-          title: "Location Information",
-          fields: Object.entries(locationInfo).map(([key, value]) => ({
-            name: key,
-            value: value.toString()
-          }))
-        }
-      ]
-    };
-
-    // إرسال الرسالة إلى Discord Webhook
-    await fetch(webhookUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(message),
-    });
-
-    console.log("Device and location information sent successfully!");
-  } catch (error) {
-    console.error("Error sending device and location information:", error);
-  }
-}
-
-// استدعاء الدالة عند تحميل الصفحة
-window.addEventListener('load', sendDeviceInfo);
+        body: JSON.stringify(message),
+      })
+        .then(() => {
+          console.log("Webhook notification sent successfully!");
+        })
+        .catch((error) => {
+          console.error("Error sending webhook notification:", error);
+        });
+    }
+  </script>
+</body>
+</html>
